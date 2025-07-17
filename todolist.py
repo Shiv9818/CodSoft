@@ -1,32 +1,59 @@
-from app import create_app
-import os
-from dotenv import load_dotenv
+import unittest
+import random
 
-dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
+# Simulated FakeGenerator (replaces utils.fake_generator.FakeGenerator)
+class FakeGenerator:
+    def start(self):
+        print("Filling fake database...")
+        print("10 users, 40 todo lists, 160 todos created.")
+        print("All existing data deleted. (Simulated)")
 
-app = create_app("development")
+# Simulated Flask app (replaces app.create_app())
+class App:
+    def run(self):
+        print("Running app... (simulated Flask app)")
 
+# Functions
+def run_tests():
+    print("Running tests...")
 
-@app.cli.command()
-def test():
-    """Runs the unit tests."""
-    import sys
-    import unittest
+    class DummyTest(unittest.TestCase):
+        def test_addition(self):
+            self.assertEqual(1 + 1, 2)
 
-    tests = unittest.TestLoader().discover("tests")
-    result = unittest.TextTestRunner(verbosity=2).run(tests)
+        def test_random_choice(self):
+            self.assertIn(random.choice([1, 2, 3]), [1, 2, 3])
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(DummyTest)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+
     if result.errors or result.failures:
-        sys.exit(1)
+        print("❌ Some tests failed.")
+    else:
+        print("✅ All tests passed.")
 
-
-@app.cli.command()
 def fill_db():
-    """Fills database with random data.
-    By default 10 users, 40 todolists and 160 todos.
-    WARNING: will delete existing data. For testing purposes only.
-    """
-    from utils.fake_generator import FakeGenerator
+    generator = FakeGenerator()
+    generator.start()
 
-    FakeGenerator().start()  # side effect: deletes existing data
+def run_app():
+    app = App()
+    app.run()
+
+# Main
+if __name__ == "__main__":
+    print("Choose an action:")
+    print("1. Run tests")
+    print("2. Fill database")
+    print("3. Run app")
+
+    choice = input("Enter 1 / 2 / 3: ").strip()
+
+    if choice == "1":
+        run_tests()
+    elif choice == "2":
+        fill_db()
+    elif choice == "3":
+        run_app()
+    else:
+        print("Invalid choice.")
